@@ -3,3 +3,5 @@
 bin/
 obj/
 .editorconfig
+Platformer2D.csproj
+app.manifest
