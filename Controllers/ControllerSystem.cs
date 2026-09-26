@@ -8,6 +8,8 @@ namespace Platformer2D.Controllers;
 
 public sealed class ControllerSystem {
     private HashSet<InputController> _controllers;
+    private float _coyoteTimer;
+    private float _jumpBufferTimer;
 
     public ControllerSystem() {
         _controllers = [];
@@ -34,9 +36,34 @@ public sealed class ControllerSystem {
         var body = entity.GetComponent<PhysicsBody>();
         if (body is null) return;
 
-        float targetVelocity = 0f;
+        UpdateCoyoteTimer(controller, body, deltaTime);
+        UpdateJumpBuffer(input, controller, deltaTime);
+        UpdateJump(input, controller, body);
+        UpdateHorizontalMovement(input, controller, body, deltaTime);
+    }
 
-        // Horizontal input movement
+    private float MoveTowards(float current, float target, float rate) {
+        if (MathF.Abs(target - current) <= rate) return target;
+
+        return current + MathF.Sign(target - current) * rate;
+    }
+
+    private void UpdateCoyoteTimer(InputController controller, PhysicsBody body, float deltaTime) {
+        if (body.IsGrounded) _coyoteTimer = controller.CoyoteTime;
+        else _coyoteTimer -= deltaTime;
+    }
+
+    private void UpdateJumpBuffer(InputSystem input, InputController controller, float deltaTime) {
+        if (input.IsActionPressed(InputAction.Jump)) {
+            _jumpBufferTimer = controller.JumpBufferTimer;
+        }
+        else {
+            _jumpBufferTimer -= deltaTime;
+        }
+    }
+
+    private void UpdateHorizontalMovement(InputSystem input, InputController controller, PhysicsBody body, float deltaTime) {
+        float targetVelocity = 0f;
         if (input.IsActionDown(InputAction.MoveLeft)) {
             targetVelocity = -controller.MoveSpeed;
         }
@@ -44,26 +71,21 @@ public sealed class ControllerSystem {
             targetVelocity = controller.MoveSpeed;
         }
 
-        // Jump movement
-        if (input.IsActionPressed(InputAction.Jump) && body.IsGrounded) {
-            body.Velocity = new Vector2(body.Velocity.X, -controller.JumpForce);
-        }
-
-        if (input.IsActionReleased(InputAction.Jump) && body.Velocity.Y <= 0f) {
-            body.Velocity = new Vector2(body.Velocity.X, -0.5f * body.Velocity.Y);
-        }
-
         // Horizontal Acceleration/Deceleration
         float rate = targetVelocity == 0f ? controller.Deceleration : controller.Acceleration;
         float horizontalVelocity = MoveTowards(body.Velocity.X, targetVelocity, rate * deltaTime);
 
         body.Velocity = new Vector2(horizontalVelocity, body.Velocity.Y);
-
     }
 
-    private float MoveTowards(float current, float target, float rate) {
-        if (MathF.Abs(target - current) <= rate) return target;
+    private void UpdateJump(InputSystem input, InputController controller, PhysicsBody body) {
+        if (_jumpBufferTimer > 0f && _coyoteTimer > 0f) {
+            body.Velocity = new Vector2(body.Velocity.X, -controller.JumpForce);
+            _coyoteTimer = 0;
+        }
 
-        return current + MathF.Sign(target - current) * rate;
+        if (input.IsActionReleased(InputAction.Jump) && body.Velocity.Y <= 0f) {
+            body.Velocity = new Vector2(body.Velocity.X, -0.5f * body.Velocity.Y);
+        }
     }
 }
