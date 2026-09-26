@@ -39,5 +39,9 @@ public sealed class ControllerSystem {
         else if (input.IsActionDown(InputAction.MoveRight)) horizontalVelocity = 200f;
 
         body.Velocity = new Vector2(horizontalVelocity, body.Velocity.Y);
+
+        if (input.IsActionPressed(InputAction.Jump) && body.IsGrounded) {
+            body.Velocity = new Vector2(body.Velocity.X, -400f);
+        }
     }
 }

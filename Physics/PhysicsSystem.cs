@@ -37,7 +37,7 @@ public class PhysicsSystem {
     public void Update(float deltaTime) {
         foreach (var body in _bodies) {
             if (body.Entity == null) continue;
-
+            body.IsGrounded = false;
             if (body.UseGravity) body.Accelaration = _gravity;
 
             body.Velocity += body.Accelaration * deltaTime;
