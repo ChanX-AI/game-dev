@@ -17,7 +17,7 @@ public class Level1 : Scene {
         divider.Transform.Position = new Vector2(200, 200);
 
         platform.AddComponent(new BoxCollider() {
-            Size = new Vector2(400, 50)
+            Size = new Vector2(1400, 50)
         });
 
         divider.AddComponent(new BoxCollider() {
@@ -25,7 +25,7 @@ public class Level1 : Scene {
         });
 
         platform.AddComponent(new SpriteRenderer() {
-            Size = new Vector2(400, 50),
+            Size = new Vector2(1400, 50),
             Color = Color.White
         });
 

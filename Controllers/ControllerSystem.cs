@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Platformer2D.Input;
@@ -20,28 +21,45 @@ public sealed class ControllerSystem {
         _controllers.Remove(controller);
     }
 
-    public void Update(InputSystem input) {
+    public void Update(InputSystem input, float deltaTime) {
         foreach (var controller in _controllers) {
-            UpdateController(controller, input);
+            UpdateController(controller, input, deltaTime);
         }
     }
 
-    private void UpdateController(InputController controller, InputSystem input) {
+    private void UpdateController(InputController controller, InputSystem input, float deltaTime) {
         var entity = controller.Entity;
         if (entity is null) return;
 
         var body = entity.GetComponent<PhysicsBody>();
         if (body is null) return;
 
-        float horizontalVelocity = 0f;
+        float targetVelocity = 0f;
 
-        if (input.IsActionDown(InputAction.MoveLeft)) horizontalVelocity = -controller.MoveSpeed;
-        else if (input.IsActionDown(InputAction.MoveRight)) horizontalVelocity = controller.MoveSpeed;
+        // Horizontal input movement
+        if (input.IsActionDown(InputAction.MoveLeft)) {
+            targetVelocity = -controller.MoveSpeed;
+        }
+        else if (input.IsActionDown(InputAction.MoveRight)) {
+            targetVelocity = controller.MoveSpeed;
+        }
 
-        body.Velocity = new Vector2(horizontalVelocity, body.Velocity.Y);
-
+        // Jump movement
         if (input.IsActionPressed(InputAction.Jump) && body.IsGrounded) {
             body.Velocity = new Vector2(body.Velocity.X, -controller.JumpForce);
         }
+
+        // Horizontal Acceleration/Deceleration
+        float rate = targetVelocity == 0f ? controller.Deceleration : controller.Acceleration;
+        float horizontalVelocity = MoveTowards(body.Velocity.X, targetVelocity, rate * deltaTime);
+
+        body.Velocity = new Vector2(horizontalVelocity, body.Velocity.Y);
+
+    }
+
+    private float MoveTowards(float current, float target, float rate) {
+        if (MathF.Abs(target - current) <= rate) return target;
+
+        return current + MathF.Sign(target - current) * rate;
     }
 }
