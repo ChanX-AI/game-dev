@@ -24,7 +24,8 @@ public class Entity {
 
     public bool RemoveComponent<T>() where T : Component {
         var component = GetComponent<T>();
-        if (component == null) { return false; }
+        if (component is null) return false;
+        
         _components.Remove(component);
         component.Entity = null;
         ComponentRemoved?.Invoke(component);
