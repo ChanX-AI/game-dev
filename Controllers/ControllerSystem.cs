@@ -49,6 +49,10 @@ public sealed class ControllerSystem {
             body.Velocity = new Vector2(body.Velocity.X, -controller.JumpForce);
         }
 
+        if (input.IsActionReleased(InputAction.Jump) && body.Velocity.Y <= 0f) {
+            body.Velocity = new Vector2(body.Velocity.X, -0.5f * body.Velocity.Y);
+        }
+
         // Horizontal Acceleration/Deceleration
         float rate = targetVelocity == 0f ? controller.Deceleration : controller.Acceleration;
         float horizontalVelocity = MoveTowards(body.Velocity.X, targetVelocity, rate * deltaTime);
