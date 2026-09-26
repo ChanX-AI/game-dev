@@ -15,7 +15,7 @@ public class PhysicsSystem {
     public PhysicsSystem() {
         _bodies = [];
         _colliders = [];
-        _gravity = new(0f, 250f);
+        _gravity = new(0f, 350f);
     }
 
     public void Register(PhysicsBody physicsBody) {

@@ -35,13 +35,13 @@ public sealed class ControllerSystem {
 
         float horizontalVelocity = 0f;
 
-        if (input.IsActionDown(InputAction.MoveLeft)) horizontalVelocity = -200f;
-        else if (input.IsActionDown(InputAction.MoveRight)) horizontalVelocity = 200f;
+        if (input.IsActionDown(InputAction.MoveLeft)) horizontalVelocity = -controller.MoveSpeed;
+        else if (input.IsActionDown(InputAction.MoveRight)) horizontalVelocity = controller.MoveSpeed;
 
         body.Velocity = new Vector2(horizontalVelocity, body.Velocity.Y);
 
         if (input.IsActionPressed(InputAction.Jump) && body.IsGrounded) {
-            body.Velocity = new Vector2(body.Velocity.X, -400f);
+            body.Velocity = new Vector2(body.Velocity.X, -controller.JumpForce);
         }
     }
 }
