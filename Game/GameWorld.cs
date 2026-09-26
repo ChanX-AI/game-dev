@@ -1,6 +1,9 @@
+using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Platformer2D.Core;
+using Platformer2D.Input;
 using Platformer2D.Physics;
 using Platformer2D.Rendering;
 using Platformer2D.Scenes;
@@ -12,12 +15,14 @@ public sealed class GameWorld {
     private Scene _scene;
     private PhysicsSystem _physics;
     private RenderSystem _render;
+    private InputSystem _input;
 
     public GameWorld(Scene scene) {
         _scene = scene;
+        _physics = new PhysicsSystem();
+        _input = new InputSystem();
         _scene.EntityAdded += OnEntityAdded;
         _scene.EntityRemoved += OnEntityRemoved;
-        _physics = new();
         _renderer = null!;
         _render = null!;
     }
@@ -33,6 +38,8 @@ public sealed class GameWorld {
 
     public void Update(GameTime gameTime) {
         float deltaTime = (float) gameTime.ElapsedGameTime.TotalSeconds;
+        _input.Update();
+        if (_input.IsKeyPressed(Keys.Space)) Console.WriteLine("SPACE");
         _physics.Update(deltaTime);
     }
 
