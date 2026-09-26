@@ -2,6 +2,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Platformer2D.Controllers;
 using Platformer2D.Core;
 using Platformer2D.Input;
 using Platformer2D.Physics;
@@ -13,18 +14,20 @@ namespace Platformer2D.Game;
 public sealed class GameWorld {
     private Renderer _renderer;
     private Scene _scene;
-    private PhysicsSystem _physics;
-    private RenderSystem _render;
-    private InputSystem _input;
+    private PhysicsSystem _physicsSystem;
+    private RenderSystem _renderSystem;
+    private InputSystem _inputSystem;
+    private ControllerSystem _controllerSystem;
 
     public GameWorld(Scene scene) {
         _scene = scene;
-        _physics = new PhysicsSystem();
-        _input = new InputSystem();
+        _inputSystem = new InputSystem();
+        _controllerSystem = new ControllerSystem();
+        _physicsSystem = new PhysicsSystem();
         _scene.EntityAdded += OnEntityAdded;
         _scene.EntityRemoved += OnEntityRemoved;
         _renderer = null!;
-        _render = null!;
+        _renderSystem = null!;
     }
 
     public void Initialize() {
@@ -33,18 +36,16 @@ public sealed class GameWorld {
     public void Load(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch) {
         _renderer = new Renderer(graphicsDevice, spriteBatch);
         _renderer.Load();
-        _render = new RenderSystem(_renderer);
+        _renderSystem = new RenderSystem(_renderer);
     }
 
     public void Update(GameTime gameTime) {
         float deltaTime = (float) gameTime.ElapsedGameTime.TotalSeconds;
-        _input.Update();
-        if (_input.IsKeyPressed(Keys.Space)) Console.WriteLine("SPACE");
-        _physics.Update(deltaTime);
+        _inputSystem.Update();
     }
 
     public void Draw() {
-        _render.Draw();
+        _renderSystem.Draw();
     }
 
     private void OnEntityAdded(Entity entity) {
@@ -52,13 +53,16 @@ public sealed class GameWorld {
         entity.ComponentRemoved += OnComponentRemoved;
 
         var body = entity.GetComponent<PhysicsBody>();
-        if (body != null) _physics.Register(body);
+        if (body is not null) _physicsSystem.Register(body);
 
         var sprite = entity.GetComponent<SpriteRenderer>();
-        if (sprite != null) _render.Register(sprite);
+        if (sprite is not null) _renderSystem.Register(sprite);
 
         var collider = entity.GetComponent<BoxCollider>();
-        if (collider != null) _physics.Register(collider);
+        if (collider is not null) _physicsSystem.Register(collider);
+
+        var controller = entity.GetComponent<InputController>();
+        if (controller is not null) _controllerSystem.Register(controller);
     }
 
     private void OnEntityRemoved(Entity entity) {
@@ -66,24 +70,29 @@ public sealed class GameWorld {
         entity.ComponentRemoved -= OnComponentRemoved;
 
         var body = entity.GetComponent<PhysicsBody>();
-        if (body != null) _physics.UnRegister(body);
+        if (body is not null) _physicsSystem.UnRegister(body);
 
         var sprite = entity.GetComponent<SpriteRenderer>();
-        if (sprite != null) _render.UnRegister(sprite);
+        if (sprite is not null) _renderSystem.UnRegister(sprite);
 
         var collider = entity.GetComponent<BoxCollider>();
-        if (collider != null) _physics.UnRegister(collider);
+        if (collider is not null) _physicsSystem.UnRegister(collider);
+
+        var controller = entity.GetComponent<InputController>();
+        if (controller is not null) _controllerSystem.UnRegister(controller);
     }
 
     private void OnComponentAdded(Component component) {
-        if (component is PhysicsBody body) _physics.Register(body);
-        if (component is SpriteRenderer renderer) _render.Register(renderer);
-        if (component is BoxCollider collider) _physics.Register(collider);
+        if (component is PhysicsBody body) _physicsSystem.Register(body);
+        if (component is SpriteRenderer renderer) _renderSystem.Register(renderer);
+        if (component is BoxCollider collider) _physicsSystem.Register(collider);
+        if (component is InputController controller) _controllerSystem.Register(controller);
     }
 
     private void OnComponentRemoved(Component component) {
-        if (component is PhysicsBody body) _physics.UnRegister(body);
-        if (component is SpriteRenderer renderer) _render.UnRegister(renderer);
-        if (component is BoxCollider collider) _physics.UnRegister(collider);
+        if (component is PhysicsBody body) _physicsSystem.UnRegister(body);
+        if (component is SpriteRenderer renderer) _renderSystem.UnRegister(renderer);
+        if (component is BoxCollider collider) _physicsSystem.UnRegister(collider);
+        if (component is InputController controller) _controllerSystem.UnRegister(controller);
     }
 }
