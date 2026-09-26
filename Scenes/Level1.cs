@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using Platformer2D.Controllers;
 using Platformer2D.Entities;
 using Platformer2D.Physics;
 using Platformer2D.Rendering;
@@ -43,6 +44,7 @@ public class Level1 : Scene {
         });
         
         player.AddComponent(new PhysicsBody());
+        player.AddComponent(new InputController());
 
         Add(player);
         Add(platform);

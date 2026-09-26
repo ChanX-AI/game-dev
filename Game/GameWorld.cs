@@ -42,6 +42,8 @@ public sealed class GameWorld {
     public void Update(GameTime gameTime) {
         float deltaTime = (float) gameTime.ElapsedGameTime.TotalSeconds;
         _inputSystem.Update();
+        _controllerSystem.Update(_inputSystem);
+        _physicsSystem.Update(deltaTime);
     }
 
     public void Draw() {
