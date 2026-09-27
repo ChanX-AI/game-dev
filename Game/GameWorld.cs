@@ -26,6 +26,9 @@ public sealed class GameWorld {
         _physicsSystem = new PhysicsSystem();
         _scene.EntityAdded += OnEntityAdded;
         _scene.EntityRemoved += OnEntityRemoved;
+        _physicsSystem.TriggerEntered += OnTriggerEntered;
+        _physicsSystem.TriggerStayed += OnTriggerStayed;
+        _physicsSystem.TriggerExited += OnTriggerExited;
         _renderer = null!;
         _renderSystem = null!;
     }
@@ -96,5 +99,20 @@ public sealed class GameWorld {
         if (component is SpriteRenderer renderer) _renderSystem.UnRegister(renderer);
         if (component is BoxCollider collider) _physicsSystem.UnRegister(collider);
         if (component is InputController controller) _controllerSystem.UnRegister(controller);
+    }
+
+    private void OnTriggerEntered(CollisionContact contact) {
+        contact.A.Entity?.GetComponent<TriggerReceiver>()?.OnTriggerEntered(contact);
+        contact.B.Entity?.GetComponent<TriggerReceiver>()?.OnTriggerEntered(contact);
+    }
+
+    private void OnTriggerStayed(CollisionContact contact) {
+        contact.A.Entity?.GetComponent<TriggerReceiver>()?.OnTriggerStayed(contact);
+        contact.B.Entity?.GetComponent<TriggerReceiver>()?.OnTriggerStayed(contact);
+    }
+
+    private void OnTriggerExited(CollisionContact contact) {
+        contact.A.Entity?.GetComponent<TriggerReceiver>()?.OnTriggerExited(contact);
+        contact.B.Entity?.GetComponent<TriggerReceiver>()?.OnTriggerExited(contact);
     }
 }

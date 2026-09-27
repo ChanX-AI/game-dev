@@ -5,6 +5,9 @@ namespace Platformer2D.Physics;
 
 public class BoxCollider : Component {
     public Vector2 Size { get; set; }
+    public CollisionLayer Layer { get; set; }
+    public CollisionLayer Mask { get; set; }
+    public bool IsTrigger { get; set; }
 
     public Bounds Bounds {
         get {

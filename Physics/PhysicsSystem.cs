@@ -11,11 +11,18 @@ public class PhysicsSystem {
     private readonly HashSet<PhysicsBody> _bodies;
     private readonly HashSet<BoxCollider> _colliders;
     private readonly Vector2 _gravity;
+    private readonly List<CollisionContact> _previousTriggers;
+    private readonly List<CollisionContact> _currentTriggers;
+    public event Action<CollisionContact>? TriggerEntered;
+    public event Action<CollisionContact>? TriggerStayed;
+    public event Action<CollisionContact>? TriggerExited;
 
     public PhysicsSystem() {
         _bodies = [];
         _colliders = [];
         _gravity = new(0f, 350f);
+        _previousTriggers = [];
+        _currentTriggers = [];
     }
 
     public void Register(PhysicsBody physicsBody) {
@@ -49,12 +56,15 @@ public class PhysicsSystem {
 
     private void DetectCollisions() {
         var colliders = _colliders.ToArray();
+        _currentTriggers.Clear();
 
         for (int i = 0; i < colliders.Length; i++) {
             for (int j = i + 1; j < colliders.Length; j++) {
 
                 var a = colliders[i];
                 var b = colliders[j];
+
+                if (!canCollide(a, b)) continue;
 
                 var bodyA = a.Entity!.GetComponent<PhysicsBody>();
                 var bodyB = b.Entity!.GetComponent<PhysicsBody>();
@@ -78,9 +88,28 @@ public class PhysicsSystem {
 
                 CollisionContact? contact = DetectCollision(moving, other);
                 if (contact is null) continue;
+
+                if (contact.A.IsTrigger || contact.B.IsTrigger) {
+                    _currentTriggers.Add(contact);
+                    continue;
+                }
                 ResolveCollision(contact);
             }
         }
+
+        foreach (var current in _currentTriggers) {
+            bool existedBefore = _previousTriggers.Any(previous => SamePair(previous, current));
+            if (existedBefore) TriggerStayed?.Invoke(current);
+            else TriggerEntered?.Invoke(current);
+        }
+
+        foreach (var previous in _previousTriggers) {
+            bool stillExists = _currentTriggers.Any(current => SamePair(previous, current));
+            if (!stillExists) TriggerExited?.Invoke(previous);
+        }
+
+        _previousTriggers.Clear();
+        _previousTriggers.AddRange(_currentTriggers);
     }
 
     private CollisionContact? DetectCollision(BoxCollider a, BoxCollider b) {
@@ -120,5 +149,17 @@ public class PhysicsSystem {
         }
         contact.A.Entity!.Transform.Position += contact.Penetration * contact.Normal;
         body.Velocity = velocity;
+    }
+
+    private bool canCollide(BoxCollider a, BoxCollider b) {
+        return
+            (a.Mask & b.Layer) != 0 &&
+            (b.Mask & a.Layer) != 0;
+    }
+
+    private bool SamePair(CollisionContact a, CollisionContact b) {
+        return
+            (a.A == b.A && a.B == b.B) ||
+            (a.A == b.B && a.B == b.A);
     }
 }

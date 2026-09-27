@@ -17,11 +17,16 @@ public class Level1 : Scene {
         divider.Transform.Position = new Vector2(200, 200);
 
         platform.AddComponent(new BoxCollider() {
-            Size = new Vector2(1400, 50)
+            Size = new Vector2(1400, 50),
+            Layer = CollisionLayer.World,
+            Mask = CollisionLayer.Player
         });
 
         divider.AddComponent(new BoxCollider() {
-            Size = new Vector2(100, 200)
+            Size = new Vector2(100, 200),
+            Layer = CollisionLayer.World,
+            Mask = CollisionLayer.Player,
+            IsTrigger = true
         });
 
         platform.AddComponent(new SpriteRenderer() {
@@ -41,10 +46,13 @@ public class Level1 : Scene {
 
         player.AddComponent(new BoxCollider() {
             Size = new Vector2(50, 70),
+            Layer = CollisionLayer.Player,
+            Mask = CollisionLayer.World | CollisionLayer.Enemy
         });
         
         player.AddComponent(new PhysicsBody());
         player.AddComponent(new InputController());
+        player.AddComponent(new TestTrigger());
 
         Add(player);
         Add(platform);
