@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Platformer2D.Game;
@@ -30,7 +31,8 @@ public class Game1 : Microsoft.Xna.Framework.Game {
         var scene = new Level1();
         _world = new GameWorld(scene);
         _world.Load(GraphicsDevice, _spriteBatch);
-         scene.Load();
+         scene.Load(Content);
+         _world.Initialize();
     }
 
     protected override void Update(GameTime gameTime) {
@@ -44,9 +46,7 @@ public class Game1 : Microsoft.Xna.Framework.Game {
 
     protected override void Draw(GameTime gameTime) {
         GraphicsDevice.Clear(Color.CornflowerBlue);
-        _spriteBatch.Begin();
         _world.Draw();
-        _spriteBatch.End();
         base.Draw(gameTime);
     }
 }

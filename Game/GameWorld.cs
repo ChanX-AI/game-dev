@@ -1,7 +1,6 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
 using Platformer2D.Controllers;
 using Platformer2D.Core;
 using Platformer2D.Input;
@@ -18,6 +17,8 @@ public sealed class GameWorld {
     private RenderSystem _renderSystem;
     private InputSystem _inputSystem;
     private ControllerSystem _controllerSystem;
+    private Camera2D _camera;
+    private Vector2 _screenSize;
 
     public GameWorld(Scene scene) {
         _scene = scene;
@@ -31,15 +32,18 @@ public sealed class GameWorld {
         _physicsSystem.TriggerExited += OnTriggerExited;
         _renderer = null!;
         _renderSystem = null!;
+        _camera = new Camera2D();
     }
 
     public void Initialize() {
+         _camera.Follow(_scene.CameraTarget);
     }
 
     public void Load(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch) {
         _renderer = new Renderer(graphicsDevice, spriteBatch);
         _renderer.Load();
-        _renderSystem = new RenderSystem(_renderer);
+        _renderSystem = new RenderSystem(_renderer, _camera);
+        _screenSize = new Vector2(graphicsDevice.Viewport.Width, graphicsDevice.Viewport.Height);
     }
 
     public void Update(GameTime gameTime) {
@@ -47,6 +51,7 @@ public sealed class GameWorld {
         _inputSystem.Update();
         _controllerSystem.Update(_inputSystem, deltaTime);
         _physicsSystem.Update(deltaTime);
+        _camera.Update(deltaTime);
     }
 
     public void Draw() {

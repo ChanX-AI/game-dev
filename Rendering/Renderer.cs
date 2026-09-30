@@ -9,11 +9,13 @@ public sealed class Renderer {
     private readonly SpriteBatch _spriteBatch;
     private readonly GraphicsDevice _graphicsDevice;
     private Texture2D _pixel;
+    public Viewport Viewport;
 
     public Renderer(GraphicsDevice graphicsDevice, SpriteBatch spriteBatch) {
         _graphicsDevice = graphicsDevice;
         _pixel = null!;
         _spriteBatch = spriteBatch;
+        Viewport = _graphicsDevice.Viewport;
     }
 
     public void Load() {
@@ -21,21 +23,9 @@ public sealed class Renderer {
         _pixel.SetData([Color.White]);
     }
 
-    // public void Draw(Scene scene) {
-    //     foreach (var entity in scene.Entities) {
-
-    //         if (entity is Player player) {
-    //             Rectangle rectangle = new (
-    //                 (int) player.Transform.Position.X,
-    //                 (int) player.Transform.Position.Y,
-    //                 (int) player.Size.X,
-    //                 (int) player.Size.Y
-    //             );
-
-    //             _spriteBatch.Draw(_pixel, rectangle, Color.Black);
-    //         }
-    //     }
-    // }
+    public void Begin(Matrix matrix) {
+        _spriteBatch.Begin(transformMatrix: matrix);
+    }
 
     public void DrawRect(Vector2 position, Vector2 size, Color color) {
         _spriteBatch.Draw(
@@ -48,5 +38,22 @@ public sealed class Renderer {
             ),
             color
         );
+    }
+
+    public void DrawTexture(Texture2D texture, Vector2 position, Vector2 size, Color color) {
+        _spriteBatch.Draw(
+            texture,
+            new Rectangle(
+                (int) position.X,
+                (int) position.Y,
+                (int) size.X,
+                (int) size.Y
+            ),
+            color
+        );
+    }
+
+    public void End() {
+        _spriteBatch.End();
     }
 }

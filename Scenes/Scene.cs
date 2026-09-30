@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Content;
 using Platformer2D.Core;
 
 namespace Platformer2D.Scenes;
@@ -10,6 +11,7 @@ public class Scene {
     public IReadOnlyList<Entity> Entities => _entities;
     public event Action<Entity>? EntityAdded;
     public event Action<Entity>? EntityRemoved;
+    public virtual Entity? CameraTarget => null;
 
     public Scene() {
         _entities = [];
@@ -24,5 +26,7 @@ public class Scene {
         _entities.Remove(entity);
         EntityRemoved?.Invoke(entity);
     }
+
+    public virtual void Load(ContentManager content) {}
 
 }
